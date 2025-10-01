@@ -43,8 +43,7 @@ namespace ExcelStatusAnalyzer
                 ReadOnly = false,
                 EditMode = DataGridViewEditMode.EditProgrammatically,
                 SelectionMode = DataGridViewSelectionMode.CellSelect,
-                MultiSelect = true,
-                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
+                MultiSelect = true,                
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 AllowUserToResizeColumns = true
             };
@@ -309,24 +308,37 @@ namespace ExcelStatusAnalyzer
             dt.Columns.Add("Left", typeof(int));
             dt.Columns.Add("Right", typeof(int));
             dt.Columns.Add("합계", typeof(int));
-
-            // 모든 회수 집합(오름차순)
-            var keys = new SortedSet<int>();
-            foreach (var kv in left) keys.Add(kv.Key);
-            foreach (var kv in right) keys.Add(kv.Key);
-
-            foreach (var k in keys)
+            
+            // 최소는 0회, 최대는 등장한 회수의 최댓값
+            int minK = 0;
+            int maxK = 0;
+            
+            foreach (var kv in left)
+                if (kv.Key > maxK) maxK = kv.Key;
+            
+            foreach (var kv in right)
+                if (kv.Key > maxK) maxK = kv.Key;
+            
+            // 데이터가 하나도 없으면 합계만 0으로 표시하고 반환
+            if (left.Count == 0 && right.Count == 0)
+            {
+                dt.Rows.Add("합계", 0, 0, 0);
+                return dt;
+            }
+            
+            // 0 ~ maxK까지 빠짐없이 채워 넣기 (없는 회수는 0)
+            for (int k = minK; k <= maxK; k++)
             {
                 int l = left.ContainsKey(k) ? left[k] : 0;
                 int r = right.ContainsKey(k) ? right[k] : 0;
                 dt.Rows.Add(k + "회", l, r, l + r);
             }
-
-            // 합계 행
+            
+            // 맨 아래 합계 행
             int lsum = 0; foreach (var kv in left) lsum += kv.Value;
             int rsum = 0; foreach (var kv in right) rsum += kv.Value;
             dt.Rows.Add("합계", lsum, rsum, lsum + rsum);
-
+            
             return dt;
         }
     }
