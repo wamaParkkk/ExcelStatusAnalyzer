@@ -28,7 +28,7 @@ namespace ExcelStatusAnalyzer
             Width = 800;
             Height = 600;
 
-            btnLoad = new Button { Text = "파일 불러오기 (CSV/XLSX/XLS)", Left = 15, Top = 15, Width = 220, Height = 32 };
+            btnLoad = new Button { Text = "파일 불러오기 (.csv/.xlsx/xls)", Left = 15, Top = 15, Width = 220, Height = 32 };
             btnLoad.Click += BtnLoad_Click;
 
             lblFile = new Label { Left = 250, Top = 22, Width = 500, Text = "파일: (없음)" };

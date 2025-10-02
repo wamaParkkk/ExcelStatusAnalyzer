@@ -29,7 +29,7 @@ namespace ExcelStatusAnalyzer
             Width = 1200;
             Height = 800;
             
-            btnLoad = new Button { Text = "엑셀 불러오기(.xlsx/.xls)", Left = 15, Top = 15, Width = 180, Height = 32 };
+            btnLoad = new Button { Text = "파일 불러오기 (.xlsx/.xls)", Left = 15, Top = 15, Width = 180, Height = 32 };
             btnLoad.Click += BtnLoad_Click;
 
             btnCopy = new Button { Text = "데이터 복사", Left = 205, Top = 15, Width = 150, Height = 32 };

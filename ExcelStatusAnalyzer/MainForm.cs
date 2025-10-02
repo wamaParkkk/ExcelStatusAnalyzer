@@ -46,10 +46,10 @@ namespace ExcelStatusAnalyzer
 
             btnLoad = new Button
             {
-                Text = "엑셀 불러오기",
+                Text = "파일 불러오기(장비 상태 레포트) (.csv/.xlsx/xls)",
                 Left = 15,
                 Top = 15,
-                Width = 160,
+                Width = 300,
                 Height = 32
             };
             btnLoad.Click += BtnLoad_Click;
@@ -89,17 +89,17 @@ namespace ExcelStatusAnalyzer
 
             lblTotal = new Label
             {
-                Left = 190,
+                Left = 330,
                 Top = 22,
-                Width = 420,
+                Width = 220,
                 Text = "총합: -"
             };
 
             lblCheck = new Label
             {
-                Left = 620,
+                Left = 560,
                 Top = 22,
-                Width = 450,
+                Width = 250,
                 Text = "검증: -"
             };
 
