@@ -84,6 +84,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlarmPivotForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmPivotForm.Designer.cs">
+      <DependentUpon>AlarmPivotForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DirCount.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -99,6 +105,9 @@
     <Compile Include="VisionRetryCountForm.Designer.cs">
       <DependentUpon>VisionRetryCountForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AlarmPivotForm.resx">
+      <DependentUpon>AlarmPivotForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
