@@ -32,7 +32,7 @@ namespace ExcelStatusAnalyzer
         
         private void BuildUi()
         {
-            Text = "교대별 웹 집계 (CDT Detail)";
+            Text = "교대별 장비 상태 집계 (CDT Detail)";
             Width = 1200;
             Height = 800;
             
@@ -95,7 +95,7 @@ namespace ExcelStatusAnalyzer
                 EditMode = DataGridViewEditMode.EditProgrammatically,
                 ScrollBars = ScrollBars.Both,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells,
-                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
+                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText,
                 AllowUserToAddRows = false
             };
             
