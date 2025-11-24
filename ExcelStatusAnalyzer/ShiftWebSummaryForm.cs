@@ -120,8 +120,8 @@ namespace ExcelStatusAnalyzer
             Controls.Add(lblInfo);
             Controls.Add(dgv);
         }
+
         // 조회 실행
-        
         private async Task FetchAndShowAsync()
         {
             try
