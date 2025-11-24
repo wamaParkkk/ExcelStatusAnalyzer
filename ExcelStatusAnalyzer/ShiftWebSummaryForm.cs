@@ -62,6 +62,15 @@ namespace ExcelStatusAnalyzer
             cboEqp.Items.Add(new ComboItem("RLTC-03 | 2025-1100360", "RLTC-03", "2025-1100360"));
             cboEqp.Items.Add(new ComboItem("RLTC-04 | 2025-1100603", "RLTC-04", "2025-1100603"));
             cboEqp.Items.Add(new ComboItem("RLTC-05 | 2025-1100653", "RLTC-05", "2025-1100653"));
+
+            cboEqp.Items.Add(new ComboItem("TC01 | 2018-1100041", "TC01", "2018-1100041"));
+            cboEqp.Items.Add(new ComboItem("TC02 | 2021-1101010", "TC02", "2018-1101010"));
+            cboEqp.Items.Add(new ComboItem("TC03 | 2021-1101565", "TC03", "2018-1101565"));
+            cboEqp.Items.Add(new ComboItem("TC04 | 2023-1100765", "TC04", "2018-1100765"));
+            cboEqp.Items.Add(new ComboItem("TC05 | 2024-1100236", "TC05", "2018-1100236"));
+            cboEqp.Items.Add(new ComboItem("TC06 | 2024-1100237", "TC06", "2018-1100237"));
+            cboEqp.Items.Add(new ComboItem("TC07 | 2024-1100528", "TC07", "2018-1100528"));
+
             if (cboEqp.Items.Count > 0) cboEqp.SelectedIndex = 0;
             
             txtBaseUrl = new TextBox
@@ -69,7 +78,7 @@ namespace ExcelStatusAnalyzer
                 Left = 440,
                 Top = 48,
                 Width = 560,
-                Text = "http://cim_service.amkor.co.kr:8080/ysj/get_cdt_report/get_cdt_detail_report?connector_name_array=K5COWCIM01&", // ← date_from/date_to는 아래에서 자동으로 붙입니다.
+                Text = "http://cim_service.amkor.co.kr:8080/ysj/get_cdt_report/get_cdt_detail_report?connector_name_array=K5FCBGATCBCIM01&", // ← date_from/date_to는 아래에서 자동으로 붙입니다.
             };
             
             btnFetch = new Button { Left = 1010, Top = 15, Width = 160, Height = 32, Text = "조회" };
