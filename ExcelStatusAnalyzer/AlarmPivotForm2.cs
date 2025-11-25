@@ -28,7 +28,7 @@ namespace ExcelStatusAnalyzer
             BuildUi();
 
             // [ADD] 시트1(KTCB-02)
-            SetWhitelist(2, new[] {
+            SetWhitelist(1, new[] {
                 "SBSI_CPLUS_EXCEPTION",
                 "MFSI_DEBUG_ASSERTION_ERROR_CAUGHT",
                 "SBSI_WRONG_STATE_EXCEPTION",
@@ -54,7 +54,7 @@ namespace ExcelStatusAnalyzer
             });
             
             // [ADD] 시트2(KTCB-03)
-            SetWhitelist(3, new[] {
+            SetWhitelist(2, new[] {
                 "DHAPLC1SI_TOOL_PICKUP_FAILURE_WARNING",
                 "DHAPLC1SI_FORCE_GAUGE_COM_FAILURE",
                 "DHAPLC2SI_HIGH_PRESSURE_BOOSTER_PRESSURE_OUT_OF_RANGE",
@@ -90,7 +90,7 @@ namespace ExcelStatusAnalyzer
             });
 
             // [ADD] 시트3(KTCB-04)
-            SetWhitelist(4, new[] {
+            SetWhitelist(3, new[] {
                 "DHAPLC1SI_SEQUENCE_ERROR_IMPACT_MISSING",
                 "SBSI_WRONG_STATE_EXCEPTION",
                 "DHAPLC1SI_SEQUENCE_ERROR_IMPACT_BEFORE_CV",
