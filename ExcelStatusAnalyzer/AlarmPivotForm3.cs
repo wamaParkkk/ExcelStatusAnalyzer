@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -64,108 +65,58 @@ namespace ExcelStatusAnalyzer
         private void BtnLoad_Click(object sender, EventArgs e)
         {
             if (ofd.ShowDialog() != DialogResult.OK) return;
-
+            
             try
             {
                 var path = ofd.FileName;
                 lblFile.Text = "파일: " + Path.GetFileName(path);
-
-                var dt = BuildMergedAlarmCountTable(path);
-
+                
+                // 1) 집계
+                var dt = BuildMergedAlarmDatePivotTable(path);
+                
+                // 2) 바인딩 (표시 문제 방지)
                 dgv.DataSource = null;
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = true;
                 dgv.DataSource = dt;
                 
+                // 3) 그리드 표시 옵션 (날짜 컬럼이 많으니 스크롤/폭 고정이 유리)
+                dgv.ScrollBars = ScrollBars.Both;
+                dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+                dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+                
+                // 4) TOTAL(총합) 열 표시/정렬/우측 고정 느낌(맨 뒤로)
+                if (dgv.Columns.Contains(TotalColName))
+                {
+                    dgv.Columns[TotalColName].HeaderText = "총합";
+                    dgv.Columns[TotalColName].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                    dgv.Columns[TotalColName].DisplayIndex = dgv.Columns.Count - 1;
+                }
+                
+                // 5) 숫자 컬럼 우측 정렬
+                for (int c = 1; c < dgv.Columns.Count; c++)
+                    dgv.Columns[c].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                
+                // 6) 컬럼 폭 자동 조정(너무 많으면 느릴 수 있어 DisplayedCells 추천)
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
-                MessageBox.Show("Rows = " + ((dt == null) ? 0 : dt.Rows.Count));
+                
+                // 결과가 없을 때만 안내
+                if (dt == null || dt.Rows.Count == 0)
+                {
+                    MessageBox.Show("집계된 데이터가 없습니다.\n(A1=No, B1=Alarm Name, C1~날짜 / 2행부터 Count 구조인지 확인)",
+                        "안내", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("처리 실패: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("처리 실패: " + ex.Message, "오류",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void BtnCopy_Click(object sender, EventArgs e)
         {
-            CopyAlarmAndTotalOnly();
-        }
-        private DataTable BuildMergedAlarmCountTable(string excelPath)
-        {
-            var dict = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            
-            using (var wb = new XLWorkbook(excelPath))
-            {
-                foreach (var ws in wb.Worksheets)
-                {
-                    // RangeUsed 말고, LastRowUsed 기준으로 B열 스캔
-                    var lastRow = ws.LastRowUsed();
-                    if (lastRow == null) continue;
-                    
-                    int last = lastRow.RowNumber();
-                    if (last <= 0) continue;
-                    
-                    var alarmsInSheet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    
-                    for (int r = 1; r <= last; r++)
-                    {
-                        // B열(2열)
-                        var cell = ws.Cell(r, 2);
-                        var alarm = cell.GetString();   // ✅ 텍스트 셀엔 이게 가장 안전
-                        if (string.IsNullOrWhiteSpace(alarm)) continue;
-                        
-                        alarmsInSheet.Add(alarm.Trim());
-                    }
-
-                    foreach (var a in alarmsInSheet)
-                    {
-                        int cur;
-                        if (!dict.TryGetValue(a, out cur)) cur = 0;
-                        dict[a] = cur + 1;
-                    }
-                }
-            }
-
-            var dt = new DataTable();
-            dt.Columns.Add("Alarm");
-            dt.Columns.Add("합계", typeof(int));
-            
-            foreach (var kv in dict.OrderByDescending(x => x.Value)
-                                   .ThenBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                dt.Rows.Add(kv.Key, kv.Value);
-            }
-
-            return dt;
-        }
-
-        private static string GetCellString(IXLCell cell)
-        {
-            if (cell == null) return string.Empty;
-
-            // ClosedXML 셀 타입별 안전 처리 (C#7.3)
-            switch (cell.DataType)
-            {
-                case XLDataType.Text:
-                    return cell.GetString().Trim();
-
-                case XLDataType.Number:
-                    return cell.GetDouble().ToString(System.Globalization.CultureInfo.InvariantCulture).Trim();
-
-                case XLDataType.Boolean:
-                    return cell.GetBoolean() ? "TRUE" : "FALSE";
-
-                case XLDataType.DateTime:
-                    return cell.GetDateTime().ToString("yyyy-MM-dd HH:mm:ss");
-
-                case XLDataType.Blank:
-                    return string.Empty;
-
-                default:
-                    var s = cell.GetString();
-                    if (!string.IsNullOrEmpty(s)) return s.Trim();
-                    return cell.Value.ToString().Trim();
-            }
+            CopyCurrentAlarmDateCounts();
         }
 
         private DataGridView CreateGrid()
@@ -177,7 +128,7 @@ namespace ExcelStatusAnalyzer
             grid.AllowUserToAddRows = false;
             grid.AllowUserToDeleteRows = false;
             grid.AllowUserToResizeRows = false;
-            
+
             grid.ScrollBars = ScrollBars.Both;
             grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
@@ -196,22 +147,239 @@ namespace ExcelStatusAnalyzer
             return grid;
         }
 
-        private void CopyAlarmAndTotalOnly()
+        private const string TotalColName = "TOTAL";
+        private DataTable BuildMergedAlarmDatePivotTable(string excelPath)
+        {
+            // alarm -> (date -> count)
+            var merged = new Dictionary<string, Dictionary<DateTime, long>>(StringComparer.OrdinalIgnoreCase);
+            var allDates = new HashSet<DateTime>();
+            
+            using (var wb = new XLWorkbook(excelPath))
+            {
+                foreach (var ws in wb.Worksheets)
+                {
+                    var lastRow = ws.LastRowUsed();
+                    var lastCell = ws.LastCellUsed();
+                    if (lastRow == null || lastCell == null) continue;
+                    
+                    int lastRowNo = lastRow.RowNumber();
+                    int lastColNo = lastCell.Address.ColumnNumber;
+                    
+                    // C1부터 날짜 헤더 읽기
+                    var dateCols = new List<Tuple<int, DateTime>>(); // (col, date)
+                    bool started = false;
+                    
+                    for (int col = 3; col <= lastColNo; col++)
+                    {
+                        var d = TryReadDate(ws.Cell(1, col));
+                        if (!d.HasValue)
+                        {
+                            if (started) break; // 날짜 시작 이후 빈칸이면 종료로 간주
+                            continue;
+                        }
+                        
+                        started = true;
+                        var day = d.Value.Date;
+                        dateCols.Add(Tuple.Create(col, day));
+                        allDates.Add(day);
+                    }
+
+                    if (dateCols.Count == 0) continue;
+                    
+                    // 2행부터 Alarm별 날짜 카운트 누적
+                    for (int r = 2; r <= lastRowNo; r++)
+                    {
+                        string alarm = ws.Cell(r, 2).GetString().Trim(); // B열
+                        if (string.IsNullOrWhiteSpace(alarm)) continue;
+                        
+                        // 혹시 합계행이 있으면 제외(안전)
+                        if (string.Equals(alarm, "TOTAL", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(alarm, "합계", StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        
+                        Dictionary<DateTime, long> inner;
+                        if (!merged.TryGetValue(alarm, out inner))
+                        {
+                            inner = new Dictionary<DateTime, long>();
+                            merged[alarm] = inner;
+                        }
+                        
+                        for (int i = 0; i < dateCols.Count; i++)
+                        {
+                            int col = dateCols[i].Item1;
+                            DateTime day = dateCols[i].Item2;
+                            
+                            long v = TryReadLong(ws.Cell(r, col));
+                            if (v == 0) continue;
+                            
+                            long cur;
+                            if (!inner.TryGetValue(day, out cur)) cur = 0;
+                            inner[day] = cur + v;
+                        }
+                    }
+                }
+            }
+
+            // 날짜 연속 채우기(min~max) + 컬럼 순서 확정
+            var dateList = new List<DateTime>();
+            if (allDates.Count > 0)
+            {
+                var min = allDates.Min();
+                var max = allDates.Max();
+                for (var d = min; d <= max; d = d.AddDays(1))
+                    dateList.Add(d);
+            }
+
+            // 결과 테이블: Alarm Name + 날짜 컬럼들 + TOTAL
+            var dt = new DataTable();
+            dt.Columns.Add("Alarm Name");
+            for (int i = 0; i < dateList.Count; i++)
+                dt.Columns.Add(dateList[i].ToString("yyyy-MM-dd"), typeof(long));
+            dt.Columns.Add(TotalColName, typeof(long));
+            
+            foreach (var alarm in merged.Keys)
+            {
+                var row = dt.NewRow();
+                row[0] = alarm;
+                
+                long total = 0;
+                var inner = merged[alarm];
+                
+                for (int i = 0; i < dateList.Count; i++)
+                {
+                    long v;
+                    if (!inner.TryGetValue(dateList[i], out v)) v = 0;
+                    row[i + 1] = v;
+                    total += v;
+                }
+                
+                row[TotalColName] = total;
+                
+                // 총합 0이면 제외
+                if (total == 0) continue;
+                
+                dt.Rows.Add(row);
+            }
+
+            // TOTAL 내림차순 정렬 후 DataTable로 확정
+            if (dt.Rows.Count > 0)
+            {
+                dt.DefaultView.Sort = "[" + TotalColName + "] DESC, [Alarm Name] ASC";
+                dt = dt.DefaultView.ToTable();
+            }
+
+            return dt;
+        }
+
+        private static DateTime? TryReadDate(IXLCell cell)
+        {
+            if (cell == null) return null;
+            
+            try
+            {
+                if (cell.DataType == XLDataType.DateTime)
+                    return cell.GetDateTime();
+                
+                if (cell.DataType == XLDataType.Number)
+                {
+                    try { return DateTime.FromOADate(cell.GetDouble()); }
+                    catch { }
+                }
+                
+                var s = cell.GetString().Trim();
+                if (string.IsNullOrEmpty(s)) return null;
+                
+                DateTime dt;
+                if (DateTime.TryParse(s, out dt)) return dt;
+                
+                string[] fmts =
+                {
+                    "M/d", "MM/dd", "M/d/yyyy", "MM/dd/yyyy",
+                    "yyyy-MM-dd", "yyyy/MM/dd",
+                    "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss"
+                };
+
+                if (DateTime.TryParseExact(s, fmts, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    return dt;
+                
+                if (DateTime.TryParseExact(s, fmts, CultureInfo.CurrentCulture, DateTimeStyles.None, out dt))
+                    return dt;
+            }
+            catch { }
+
+            return null;
+        }
+
+        private static long TryReadLong(IXLCell cell)
+        {
+            if (cell == null) return 0;
+            
+            try
+            {
+                if (cell.DataType == XLDataType.Number)
+                    return (long)Math.Round(cell.GetDouble(), 0);
+                
+                var s = cell.GetString().Trim();
+                if (string.IsNullOrEmpty(s)) return 0;
+                
+                long n;
+                if (long.TryParse(s.Replace(",", ""), out n)) return n;
+                
+                double d;
+                if (double.TryParse(s.Replace(",", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out d))
+                    return (long)Math.Round(d, 0);
+            }
+            catch { }
+
+            return 0;
+        }
+
+        private void CopyCurrentAlarmDateCounts()
         {
             var dt = dgv.DataSource as DataTable;
             if (dt == null || dt.Rows.Count == 0) return;
-
-            // 헤더 없이: Alarm \t 합계
+            
+            const string alarmCol = "Alarm Name";
+            
+            if (!dt.Columns.Contains(alarmCol))
+            {
+                MessageBox.Show("복사 실패: 'Alarm Name' 컬럼을 찾을 수 없습니다.", "오류",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
+            // 복사 대상: Alarm Name + 날짜 컬럼들 (TOTAL 제외)
+            var valueColIndexes = new List<int>();
+            for (int c = 0; c < dt.Columns.Count; c++)
+            {
+                var name = dt.Columns[c].ColumnName;
+                if (string.Equals(name, TotalColName, StringComparison.OrdinalIgnoreCase))
+                    continue; // TOTAL 제외
+                valueColIndexes.Add(c);
+            }
+            
             var sb = new System.Text.StringBuilder();
+            
+            // 헤더 복사 X (요구사항)
             for (int r = 0; r < dt.Rows.Count; r++)
             {
                 var row = dt.Rows[r];
-                sb.Append(Convert.ToString(row["Alarm"]));
-                sb.Append('\t');
-                sb.Append(Convert.ToString(row["합계"]));
+                
+                // Alarm Name
+                sb.Append(Convert.ToString(row[alarmCol]));
+                
+                // 날짜 값들(숫자)
+                for (int i = 1; i < valueColIndexes.Count; i++)
+                {
+                    int idx = valueColIndexes[i];
+                    long num;
+                    if (!long.TryParse(Convert.ToString(row[idx]), out num)) num = 0;
+                    sb.Append('\t').Append(num.ToString());
+                }
+                
                 sb.Append('\n');
             }
-
+            
             Clipboard.Clear();
             Clipboard.SetText(sb.ToString());
         }
