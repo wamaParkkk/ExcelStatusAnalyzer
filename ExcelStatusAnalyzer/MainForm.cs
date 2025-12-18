@@ -139,9 +139,14 @@ namespace ExcelStatusAnalyzer
             this.Controls.Add(btnAlarmPivot);
 
             // Alarm Pivot2
-            var btnAlarmPivot2 = new Button { Text = "Alarm 집계(필터형)", Left = 225, Top = 724, Width = 200, Height = 32 };
+            var btnAlarmPivot2 = new Button { Text = "Alarm 집계(KTCB)", Left = 225, Top = 724, Width = 200, Height = 32 };
             btnAlarmPivot2.Click += (s, e) => new AlarmPivotForm2().Show();
             this.Controls.Add(btnAlarmPivot2);
+
+            // Alarm Pivot3
+            var btnAlarmPivot3 = new Button { Text = "Alarm 집계(KTCB-모델별)", Left = 435, Top = 724, Width = 200, Height = 32 };
+            btnAlarmPivot3.Click += (s, e) => new AlarmPivotForm3().Show();
+            this.Controls.Add(btnAlarmPivot3);
 
             var btnShiftWeb = new Button { Text = "교대별 장비 상태 집계", Left = 435, Top = 687, Width = 200, Height = 32 };
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();

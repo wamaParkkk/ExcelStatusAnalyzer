@@ -99,6 +99,12 @@
     <Compile Include="AlarmPivotForm.Designer.cs">
       <DependentUpon>AlarmPivotForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="AlarmPivotForm3.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmPivotForm3.Designer.cs">
+      <DependentUpon>AlarmPivotForm3.cs</DependentUpon>
+    </Compile>
     <Compile Include="DirCount.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

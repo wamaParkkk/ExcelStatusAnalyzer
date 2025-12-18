@@ -66,7 +66,7 @@ namespace ExcelStatusAnalyzer
 
         private void BuildUi()
         {
-            Text = "Alarm Name × 날짜별 발생횟수";
+            Text = "Alarm Name × 날짜별 발생횟수 (KTCB)";
             Width = 1200;
             Height = 800;
 
