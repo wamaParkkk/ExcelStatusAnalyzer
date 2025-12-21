@@ -41,8 +41,8 @@ namespace ExcelStatusAnalyzer
         private void BuildUi()
         {
             this.Text = "Excel Status Analyzer";
-            this.Width = 1100;
-            this.Height = 800;
+            this.Width = 1280;
+            this.Height = 1024;
 
             btnLoad = new Button
             {
@@ -134,19 +134,29 @@ namespace ExcelStatusAnalyzer
             this.Controls.Add(btnVisionRetryCount);
 
             // Alarm Pivot
-            var btnAlarmPivot = new Button { Text = "Alarm 일자별 집계", Left = 225, Top = 687, Width = 200, Height = 32 };
+            var btnAlarmPivot = new Button { Text = "Alarm 집계", Left = 225, Top = 687, Width = 200, Height = 32 };
             btnAlarmPivot.Click += (s, e) => new AlarmPivotForm().Show();
             this.Controls.Add(btnAlarmPivot);
 
             // Alarm Pivot2
-            var btnAlarmPivot2 = new Button { Text = "Alarm 집계(KTCB)", Left = 225, Top = 724, Width = 200, Height = 32 };
+            var btnAlarmPivot2 = new Button { Text = "Alarm 집계(KTCB(White))", Left = 225, Top = 724, Width = 200, Height = 32 };
             btnAlarmPivot2.Click += (s, e) => new AlarmPivotForm2().Show();
             this.Controls.Add(btnAlarmPivot2);
 
             // Alarm Pivot3
-            var btnAlarmPivot3 = new Button { Text = "Alarm 집계(KTCB-모델별)", Left = 435, Top = 724, Width = 200, Height = 32 };
+            var btnAlarmPivot3 = new Button { Text = "Alarm 집계(KTCB-모델별(White))", Left = 435, Top = 724, Width = 200, Height = 32 };
             btnAlarmPivot3.Click += (s, e) => new AlarmPivotForm3().Show();
             this.Controls.Add(btnAlarmPivot3);
+
+            // Alarm Pivot4
+            var btnAlarmPivot4 = new Button { Text = "Alarm 집계(KTCB-MTBA(White))", Left = 645, Top = 724, Width = 200, Height = 32 };
+            btnAlarmPivot4.Click += (s, e) => new AlarmPivotForm4().Show();
+            this.Controls.Add(btnAlarmPivot4);
+
+            // Alarm Pivot5
+            var btnAlarmPivot5 = new Button { Text = "Alarm 집계(KTCB-모델별 MTBA(White))", Left = 855, Top = 724, Width = 300, Height = 32 };
+            btnAlarmPivot5.Click += (s, e) => new AlarmPivotForm5().Show();
+            this.Controls.Add(btnAlarmPivot5);
 
             var btnShiftWeb = new Button { Text = "교대별 장비 상태 집계", Left = 435, Top = 687, Width = 200, Height = 32 };
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
