@@ -153,22 +153,21 @@ namespace ExcelStatusAnalyzer
             
             var counts = new Dictionary<string, Dictionary<DateTime, int>>(StringComparer.OrdinalIgnoreCase);
             var allDates = new HashSet<DateTime>();
-            
-            // 데이터는 2행부터 (A1=Alarm Name, C1=Date)
+
+            // 데이터는 2행부터 (1행은 헤더)
             foreach (var row in used.Rows().Skip(1))
             {
-                string alarm = GetCellString(row.Cell(1));
+                // F열(6): Alarm Name
+                string alarm = GetCellString(row.Cell(6));
                 if (string.IsNullOrWhiteSpace(alarm)) continue;
                 
-                // 전체 DateTime 필요 (시간대 필터 때문에)
-                DateTime? stamp = TryReadDate(row.Cell(3));
+                // G열(7): DateTime (시간 포함)
+                DateTime? stamp = TryReadDate(row.Cell(7));
                 if (!stamp.HasValue) continue;
                 
-                // 교대(시간대) 필터 적용
-                if (!ShouldIncludeByShift(stamp.Value.TimeOfDay, incDay, incSwing, incNight))
-                    continue;
+                // 06:00 기준으로 '집계 날짜' 계산
+                var day = GetWorkDay(stamp.Value);
                 
-                var day = stamp.Value.Date; // 집계는 '날짜' 단위 (열은 yyyy-MM-dd)
                 allDates.Add(day);
                 
                 Dictionary<DateTime, int> inner;
@@ -177,7 +176,7 @@ namespace ExcelStatusAnalyzer
                     inner = new Dictionary<DateTime, int>();
                     counts[alarm] = inner;
                 }
-                
+
                 int c;
                 if (!inner.TryGetValue(day, out c)) c = 0;
                 inner[day] = c + 1;
@@ -224,6 +223,15 @@ namespace ExcelStatusAnalyzer
             dt = dt.DefaultView.ToTable();
             
             return dt;
+        }
+
+        private static DateTime GetWorkDay(DateTime stamp)
+        {
+            // 06:00:00 ~ 다음날 05:59:59 => 시작일로 귀속
+            // 즉, 00:00~05:59:59는 전날로 내려감
+            return (stamp.TimeOfDay < new TimeSpan(6, 0, 0))
+                ? stamp.Date.AddDays(-1)
+                : stamp.Date;
         }
 
         // 교대 포함 여부 판단 (Day: 06:00–13:59:59, Swing: 14:00–21:59:59, Night: 22:00–05:59:59)
