@@ -158,6 +158,11 @@ namespace ExcelStatusAnalyzer
             btnAlarmPivot5.Click += (s, e) => new AlarmPivotForm5().Show();
             this.Controls.Add(btnAlarmPivot5);
 
+            // Daily tracker
+            var btnDailyTracker = new Button { Text = "Daily Tracker(KTCB-모델별)", Left = 1065, Top = 724, Width = 300, Height = 32 };
+            btnDailyTracker.Click += (s, e) => new DailyTrackerPivotForm().Show();
+            this.Controls.Add(btnDailyTracker);
+
             var btnShiftWeb = new Button { Text = "교대별 장비 상태 집계", Left = 435, Top = 687, Width = 200, Height = 32 };
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
             this.Controls.Add(btnShiftWeb);
