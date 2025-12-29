@@ -23,7 +23,7 @@ namespace ExcelStatusAnalyzer
 
         private void BuildUi()
         {
-            Text = "Alarm Pivot Form 3 (모든 시트 B열 Alarm 통합 합계) (KTCB-모델별)";
+            Text = "Alarm 통합 합계 (KTCB-모델별)";
             Width = 900;
             Height = 760;
 

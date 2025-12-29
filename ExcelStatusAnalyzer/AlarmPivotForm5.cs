@@ -31,7 +31,7 @@ namespace ExcelStatusAnalyzer
 
         private void BuildUi()
         {
-            Text = "Alarm Pivot Form 5 (모델별 합산: APAMA/APTURA)";
+            Text = "Alarm 횟수/시간 합산(KTCB-모델별 MTBA)";
 
             Width = 1200;
             Height = 800;

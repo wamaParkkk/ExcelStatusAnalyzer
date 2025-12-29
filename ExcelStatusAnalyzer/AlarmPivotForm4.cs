@@ -29,7 +29,7 @@ namespace ExcelStatusAnalyzer
 
         private void BuildUi()
         {
-            Text = "Alarm Pivot Form 4 (시트별 알람 횟수/시간 합산)";
+            Text = "Alarm 횟수/시간 합산(KTCB-장비별 MTBA)";
 
             Width = 1200;
             Height = 800;
