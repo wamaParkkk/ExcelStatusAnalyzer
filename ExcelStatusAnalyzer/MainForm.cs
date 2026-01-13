@@ -166,6 +166,10 @@ namespace ExcelStatusAnalyzer
             var btnShiftWeb = new Button { Text = "교대별 장비 상태 집계", Left = 15, Top = 761, Width = 200, Height = 32 };
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
             this.Controls.Add(btnShiftWeb);
+
+            var btnDailyUtil = new Button { Text = "가동률 자동 입력", Left = 15, Top = 795, Width = 200, Height = 32 };
+            btnDailyUtil.Click += (s, e) => new DailyUtilFillForm().Show();
+            this.Controls.Add(btnDailyUtil);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)
