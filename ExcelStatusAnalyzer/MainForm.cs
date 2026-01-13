@@ -167,9 +167,13 @@ namespace ExcelStatusAnalyzer
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
             this.Controls.Add(btnShiftWeb);
 
-            var btnDailyUtil = new Button { Text = "가동률 자동 입력", Left = 15, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil = new Button { Text = "가동률 자동 입력(AS21100-FL/CL)", Left = 15, Top = 795, Width = 200, Height = 32 };
             btnDailyUtil.Click += (s, e) => new DailyUtilFillForm().Show();
             this.Controls.Add(btnDailyUtil);
+
+            var btnDailyUtil2 = new Button { Text = "가동률 자동 입력(AS21105-FL/CL)", Left = 225, Top = 795, Width = 200, Height = 32 };
+            btnDailyUtil2.Click += (s, e) => new DailyUtilFillForm2().Show();
+            this.Controls.Add(btnDailyUtil2);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)

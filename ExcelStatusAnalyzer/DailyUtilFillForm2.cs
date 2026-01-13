@@ -12,45 +12,52 @@ using System.Windows.Forms;
 
 namespace ExcelStatusAnalyzer
 {
-    public partial class DailyUtilFillForm : Form
+    public partial class DailyUtilFillForm2 : Form
     {
         private Button btnLoadAndApply;
         private DataGridView dgv;
         private Label lblFile;
         private TextBox txtLog;
         private OpenFileDialog ofd;
-        
+
+        private Dictionary<string, int> _equipBlockIndex;        
+
         // 고정 타겟 경로
         private const string TargetPath = @"C:\Users\156607\Amkor_Project\Document\장비 가동률 데이터\FL_CL\FL_CL Daily 가동현황.xlsx";
-        
+
         // 타겟 시트/컬럼
-        private const int TargetSheetIndex = 1; // 첫번째 시트
+        private const int TargetSheetIndex = 2; // 두번째 시트
         private const int TargetRowStart = 4;   // 4행부터
         private const int ColDate = 2;          // B
         private const int ColEquip = 3;         // C
         private const int ColUtil = 6;          // F
-                                                
+
         // 소스 컬럼 (요구사항)
         private const int SrcColEquip = 1;      // A
         private const int SrcColUtil = 4;       // D
-        
-        private readonly HashSet<string> _allowedEquip = new HashSet<string>(
-            Enumerable.Range(1, 16).Select(i => $"BA-FC-{i:00}"),
-            StringComparer.OrdinalIgnoreCase);
-        
-        public DailyUtilFillForm()
+
+        private readonly HashSet<string> _allowedEquip = new HashSet<string>(new[]
+        {
+            "FC01","FC02","FC03","FC04","FC04-1","FC05","FC05-1","FC06","FC06-1",
+            "FC07","FC07-1","FC08","FC09","FC10","FC11","FC11-1","FC12","FC12-1",
+            "FC13","FC13-1","FC14","FC14-1"
+        }, StringComparer.OrdinalIgnoreCase);        
+
+        public DailyUtilFillForm2()
         {
             // (일부 환경에서 필요) ExcelDataReader 코드페이지 등록
             try { Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); } catch { }
             BuildUi();
+
+            InitBlockIndex();
         }
-        
+
         private void BuildUi()
         {
             Text = "가동률 자동 채움 (Source -> FL_CL Daily 가동현황.xlsx)";
             Width = 1200;
             Height = 780;
-            
+
             btnLoadAndApply = new Button
             {
                 Left = 15,
@@ -60,7 +67,7 @@ namespace ExcelStatusAnalyzer
                 Text = "소스 엑셀 불러오기 + 타겟에 적용"
             };
             btnLoadAndApply.Click += BtnLoadAndApply_Click;
-            
+
             lblFile = new Label
             {
                 Left = 290,
@@ -68,7 +75,7 @@ namespace ExcelStatusAnalyzer
                 Width = 880,
                 Text = "파일: (없음)"
             };
-            
+
             dgv = new DataGridView
             {
                 Left = 15,
@@ -81,7 +88,7 @@ namespace ExcelStatusAnalyzer
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells,
                 ScrollBars = ScrollBars.Both
             };
-            
+
             txtLog = new TextBox
             {
                 Left = 15,
@@ -93,55 +100,70 @@ namespace ExcelStatusAnalyzer
                 ScrollBars = ScrollBars.Vertical,
                 ReadOnly = true
             };
-            
+
             ofd = new OpenFileDialog
             {
                 Filter = "Excel|*.xlsx;*.xls",
                 Title = "가동률 소스 파일 선택"
             };
-            
+
             Controls.Add(btnLoadAndApply);
             Controls.Add(lblFile);
             Controls.Add(dgv);
             Controls.Add(txtLog);
         }
 
+        private void InitBlockIndex()
+        {
+            // 이 순서가 타겟 엑셀의 블록 순서와 같아야 함 (FC01이 1번블록, FC02가 2번블록...)
+            var list = new[]
+            {
+                "FC01","FC02","FC03","FC04","FC04-1","FC05","FC05-1","FC06","FC06-1",
+                "FC07","FC07-1","FC08","FC09","FC10","FC11","FC11-1","FC12","FC12-1",
+                "FC13","FC13-1","FC14","FC14-1"
+            };
+
+            _equipBlockIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < list.Length; i++)
+                _equipBlockIndex[list[i]] = i + 1; // 1-based
+        }
+
         private void BtnLoadAndApply_Click(object sender, EventArgs e)
         {
             if (ofd.ShowDialog() != DialogResult.OK) return;
-            
+
             txtLog.Clear();
-            
+
             try
             {
                 var srcPath = ofd.FileName;
                 lblFile.Text = "파일: " + Path.GetFileName(srcPath);
-                
+
                 // 1) 소스에서 날짜(yyyymmdd) 추출
                 var reportDate = ExtractDateFromFileName(srcPath);
                 if (!reportDate.HasValue)
                     throw new Exception("소스 파일명에서 yyyymmdd 날짜를 찾지 못했습니다. 예: ..._20251201.xls");
-                
+
                 Log($"[소스 날짜] {reportDate.Value:yyyy-MM-dd}");
-                
+
                 // 2) 소스 엑셀 읽어서 (장비명 -> Util) 맵 생성
                 var utilMap = ReadSourceUtilMap(srcPath);
                 if (utilMap.Count == 0)
                     throw new Exception("소스 파일에서 (A=장비명, D=가동률) 데이터를 찾지 못했습니다.");
-                
+
                 Log($"[소스] 추출 장비 수: {utilMap.Count}");
-                
+
                 // 3) 타겟 엑셀에 채우기
                 if (!File.Exists(TargetPath))
                     throw new Exception("타겟 파일이 존재하지 않습니다: " + TargetPath);
-                
+
                 var result = ApplyToTarget(TargetPath, reportDate.Value.Date, utilMap);
-                
+
                 // 4) 미리보기 테이블
                 dgv.DataSource = BuildPreviewTable(utilMap, result);
-                
+
                 Log($"[적용 완료] 업데이트 행 수: {result.UpdatedRows}");
-                
+
                 if (result.NotFoundInTarget.Count > 0)
                 {
                     Log("[타겟에 없는 장비/날짜 매칭]");
@@ -151,7 +173,7 @@ namespace ExcelStatusAnalyzer
 
                 if (result.NotFoundInSource.Count > 0)
                 {
-                    Log("[소스에 없는 장비(BA-FC-01~16 중)]");
+                    Log("[소스에 없는 장비]");
                     foreach (var s in result.NotFoundInSource)
                         Log("  - " + s);
                 }
@@ -174,12 +196,12 @@ namespace ExcelStatusAnalyzer
             var name = Path.GetFileNameWithoutExtension(path);
             var m = Regex.Match(name, @"(20\d{6})"); // 20xxxxxx
             if (!m.Success) return null;
-            
+
             DateTime dt;
             if (DateTime.TryParseExact(m.Groups[1].Value, "yyyyMMdd",
                 CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                 return dt;
-            
+
             return null;
         }
 
@@ -190,7 +212,7 @@ namespace ExcelStatusAnalyzer
         {
             // 허용 장비만
             var map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-            
+
             // 1) ExcelDataReader로 시도 (xls/xlsx)
             try
             {
@@ -207,19 +229,22 @@ namespace ExcelStatusAnalyzer
 
                     if (ds.Tables.Count == 0) return map;
                     var t = ds.Tables[0]; // 첫 시트
-                    
+
                     for (int r = 0; r < t.Rows.Count; r++)
                     {
-                        var equip = SafeToString(t.Rows[r][SrcColEquip - 1]);
+                        var equipRaw = SafeToString(t.Rows[r][SrcColEquip - 1]);
+                        if (string.IsNullOrWhiteSpace(equipRaw)) continue;
+                        
+                        // 장비명이 "FC04, FC04-1" 처럼 2개면 첫번째만 사용
+                        var equip = NormalizeFirstEquipName(equipRaw);
                         if (string.IsNullOrWhiteSpace(equip)) continue;
                         
-                        equip = equip.Trim();
                         if (!_allowedEquip.Contains(equip)) continue;
-                        
+
                         var utilObj = t.Rows[r][SrcColUtil - 1];
                         var util = ParseUtilPercent(utilObj);
                         if (!util.HasValue) continue;
-                        
+
                         map[equip] = util.Value; // 0~100
                     }
                 }
@@ -233,34 +258,55 @@ namespace ExcelStatusAnalyzer
             }
         }
 
+        private static string NormalizeFirstEquipName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+            
+            var s = raw.Trim();
+            
+            // 구분자(콤마/슬래시/개행/탭)로 "두 번째 장비명"이 붙는 경우 첫 덩어리만 사용
+            // 예: "FC04, FC04" -> "FC04"
+            // 예: "FC04 / FC04" -> "FC04"
+            // 예: "FC04-1 / FC04-1" -> "FC04-1"
+            var parts = s.Split(new[] { ',', '/', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            s = (parts.Length > 0) ? parts[0].Trim() : s;
+            
+            // 그래도 "FC04  FC04" 처럼 공백으로 두 개가 붙으면 첫 토큰만
+            // (FC04-1 같은 하이픈 포함은 그대로 유지됨)
+            var tokens = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length > 0) s = tokens[0].Trim();
+            
+            return s;
+        }
+
         // HTML형 xls fallback (폴더가 같이 있을 때)
         private Dictionary<string, double> ReadSourceUtilMap_HtmlFallback(string srcPath)
         {
             var map = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-            
+
             // 예: 표준_20251201.files/sheet001.htm
             var baseName = Path.GetFileNameWithoutExtension(srcPath);
             var dir = Path.Combine(Path.GetDirectoryName(srcPath), baseName + ".files");
             var sheet1 = Path.Combine(dir, "sheet001.htm");
-            
+
             if (!File.Exists(sheet1))
                 throw new Exception("소스가 HTML형 xls로 보입니다. 그러나 sheet001.htm를 찾지 못했습니다:\n" + sheet1);
-            
+
             var html = File.ReadAllText(sheet1, Encoding.UTF8);
-            
+
             // 아주 단순 파서(필요 최소): <tr><td>...</td>... 추출
             // A열/ D열만 필요하므로 row별 td를 뽑아 A(0),D(3) 사용
             foreach (var row in ExtractHtmlTableRows(html))
             {
                 if (row.Count < 4) continue;
-                
+
                 var equip = (row[0] ?? "").Trim();
                 if (string.IsNullOrWhiteSpace(equip)) continue;
                 if (!_allowedEquip.Contains(equip)) continue;
-                
+
                 var util = ParseUtilPercent(row[3]);
                 if (!util.HasValue) continue;
-                
+
                 map[equip] = util.Value;
             }
 
@@ -303,6 +349,7 @@ namespace ExcelStatusAnalyzer
             
             using (var wb = new XLWorkbook(targetPath))
             {
+                // 두번째 시트
                 var ws = wb.Worksheet(TargetSheetIndex);
                 
                 var lastRow = ws.LastRowUsed()?.RowNumber() ?? TargetRowStart - 1;
@@ -310,20 +357,25 @@ namespace ExcelStatusAnalyzer
                 
                 var updatedEquip = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 
+                // 소스에서 읽은 장비별 Util을 타겟에 반영
                 foreach (var kv in utilMap)
                 {
-                    var equip = kv.Key;     // BA-FC-xx
-                    var util = kv.Value;    // 0~100
+                    var equip = kv.Key;      // 예: FC01, FC04-1 ...
+                    var util = kv.Value;     // 0~100
+                                             
+                    // 장비명 -> 블록 번호
+                    int blockNo;
+                    if (_equipBlockIndex == null || !_equipBlockIndex.TryGetValue(equip, out blockNo))
+                        continue;
                     
-                    int equipNo = ParseEquipNo(equip);
-                    if (equipNo < 1) continue;
-                    
-                    int dateCol = GetDateCol(equipNo);
-                    int equipCol = GetEquipCol(equipNo);
-                    int utilCol = GetUtilCol(equipNo);
+                    // 블록 기준 컬럼 계산 (7열 간격)
+                    int dateCol = GetDateCol(blockNo);
+                    int equipCol = GetEquipCol(blockNo);
+                    int utilCol = GetUtilCol(blockNo);
                     
                     bool wrote = false;
                     
+                    // 타겟에서 해당 날짜(reportDate) 행을 찾아 F(또는 계산된 utilCol)에 입력
                     for (int r = TargetRowStart; r <= lastRow; r++)
                     {
                         var dt = TryReadExcelDate(ws.Cell(r, dateCol));
@@ -331,23 +383,24 @@ namespace ExcelStatusAnalyzer
                         
                         if (dt.Value.Date != reportDate.Date) continue;
                         
-                        // 장비명 확인(혹시 틀어져 있으면 안전하게 세팅)
+                        // 혹시 장비명이 비어있으면 채워줌(안전장치)
                         var curEquip = ws.Cell(r, equipCol).GetString().Trim();
                         if (string.IsNullOrWhiteSpace(curEquip))
                             ws.Cell(r, equipCol).Value = equip;
                         
                         ws.Cell(r, utilCol).Value = util;
+                        
                         result.UpdatedRows++;
                         updatedEquip.Add(equip);
                         wrote = true;
-                        break; // 같은 날짜 행은 1개라고 가정
+                        break; // 같은 날짜는 한 행이라고 가정
                     }
 
                     if (!wrote)
                         result.NotFoundInTarget.Add($"{equip} (타겟에서 날짜 {reportDate:yyyy-MM-dd} 행을 못 찾음)");
                 }
 
-                // BA-FC-01~16 중 소스에 없는 것 표시(원하면 유지)
+                // BA/FC 목록 중 소스에 없는 것 표기(원하면 유지)
                 foreach (var eq in _allowedEquip.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))
                 {
                     if (!utilMap.ContainsKey(eq))
@@ -361,12 +414,11 @@ namespace ExcelStatusAnalyzer
         }
 
         private static int ParseEquipNo(string equip)
-        {
-            // "BA-FC-01" -> 1
+        {            
             if (string.IsNullOrWhiteSpace(equip)) return -1;
             var parts = equip.Trim().Split('-');
             if (parts.Length < 3) return -1;
-            
+
             int n;
             return int.TryParse(parts[2], out n) ? n : -1;
         }
@@ -378,21 +430,21 @@ namespace ExcelStatusAnalyzer
         private static DateTime? TryReadExcelDate(IXLCell cell)
         {
             if (cell == null) return null;
-            
+
             if (cell.DataType == XLDataType.DateTime)
                 return cell.GetDateTime();
-            
+
             if (cell.DataType == XLDataType.Number)
             {
                 try { return DateTime.FromOADate(cell.GetDouble()); } catch { }
             }
-            
+
             var s = cell.GetString().Trim();
             if (string.IsNullOrEmpty(s)) return null;
-            
+
             DateTime dt;
             if (DateTime.TryParse(s, out dt)) return dt;
-            
+
             return null;
         }
 
@@ -404,7 +456,7 @@ namespace ExcelStatusAnalyzer
             var dt = new DataTable();
             dt.Columns.Add("Equip");
             dt.Columns.Add("Util(%)", typeof(double));
-            
+
             foreach (var kv in utilMap.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
             {
                 var row = dt.NewRow();
@@ -429,7 +481,7 @@ namespace ExcelStatusAnalyzer
         private static double? ParseUtilPercent(object v)
         {
             if (v == null || v == DBNull.Value) return null;
-            
+
             if (v is double)
             {
                 var d = (double)v;
@@ -446,10 +498,10 @@ namespace ExcelStatusAnalyzer
 
             var s = Convert.ToString(v).Trim();
             if (string.IsNullOrEmpty(s)) return null;
-            
+
             s = s.Replace("%", "").Trim();
             double d2;
-            
+
             if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out d2) ||
                 double.TryParse(s, NumberStyles.Any, CultureInfo.CurrentCulture, out d2))
             {
