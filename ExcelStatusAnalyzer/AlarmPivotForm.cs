@@ -99,7 +99,8 @@ namespace ExcelStatusAnalyzer
 
                 using (var wb = new XLWorkbook(path))
                 {
-                    int sheetCount = Math.Min(6, wb.Worksheets.Count);
+                    //int sheetCount = Math.Min(6, wb.Worksheets.Count);
+                    int sheetCount = wb.Worksheets.Count;
                     for (int i = 1; i <= sheetCount; i++)
                     {
                         var ws = wb.Worksheet(i);
