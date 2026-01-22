@@ -478,6 +478,7 @@ namespace ExcelStatusAnalyzer
         }
 
         // 가동률 파싱: "85.3%", "85.3", 0.853 등 모두 대응
+        // 반올림/정수화 없이 "값 그대로" 반환 (0~1이면 *100 변환만)
         private static double? ParseUtilPercent(object v)
         {
             if (v == null || v == DBNull.Value) return null;
@@ -485,28 +486,30 @@ namespace ExcelStatusAnalyzer
             if (v is double)
             {
                 var d = (double)v;
-                if (d > 0 && d <= 1.0) return Math.Round(d * 100.0, 1); // 0~1이면 퍼센트로 변환
-                return Math.Round(d, 1);
+                if (d > 0 && d <= 1.0) return d * 100.0; // 0~1이면 퍼센트로 변환
+                return d;
             }
 
             if (v is float)
             {
                 var d = Convert.ToDouble(v);
-                if (d > 0 && d <= 1.0) return Math.Round(d * 100.0, 1);
-                return Math.Round(d, 1);
+                if (d > 0 && d <= 1.0) return d * 100.0;
+                return d;
             }
 
-            var s = Convert.ToString(v).Trim();
+            var s = Convert.ToString(v);
+            if (s == null) return null;
+            s = s.Trim();
             if (string.IsNullOrEmpty(s)) return null;
 
             s = s.Replace("%", "").Trim();
-            double d2;
 
+            double d2;
             if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out d2) ||
                 double.TryParse(s, NumberStyles.Any, CultureInfo.CurrentCulture, out d2))
             {
-                if (d2 > 0 && d2 <= 1.0) return Math.Round(d2 * 100.0, 1);
-                return Math.Round(d2, 1);
+                if (d2 > 0 && d2 <= 1.0) return d2 * 100.0;
+                return d2;
             }
 
             return null;
