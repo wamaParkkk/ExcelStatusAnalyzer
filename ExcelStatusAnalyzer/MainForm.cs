@@ -1,6 +1,4 @@
 ﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Office.MetaAttributes;
-using DocumentFormat.OpenXml.VariantTypes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -178,6 +176,10 @@ namespace ExcelStatusAnalyzer
             var btnDailyUtil3 = new Button { Text = "가동률 자동 입력(AS21101-PNP)", Left = 435, Top = 795, Width = 200, Height = 32 };
             btnDailyUtil3.Click += (s, e) => new DailyUtilFillForm3().Show();
             this.Controls.Add(btnDailyUtil3);
+
+            var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 645, Top = 795, Width = 200, Height = 32 };
+            btnDailyUtilLookupMulti.Click += (s, e) => new DailyUtilLookupMultiForm().Show();
+            this.Controls.Add(btnDailyUtilLookupMulti);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)

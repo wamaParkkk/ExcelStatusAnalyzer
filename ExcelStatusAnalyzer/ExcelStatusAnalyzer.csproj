@@ -153,6 +153,12 @@
     <Compile Include="DailyUtilFillForm2.Designer.cs">
       <DependentUpon>DailyUtilFillForm2.cs</DependentUpon>
     </Compile>
+    <Compile Include="DailyUtilLookupMultiForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DailyUtilLookupMultiForm.Designer.cs">
+      <DependentUpon>DailyUtilLookupMultiForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DirCount.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
