@@ -23,7 +23,7 @@ namespace ExcelStatusAnalyzer
         private Dictionary<string, int> _equipBlockIndex;        
 
         // 고정 타겟 경로
-        private const string TargetPath = @"C:\Users\156607\Amkor_Project\Document\장비 가동률 데이터\PNP\PNP Daily 가동현황.xlsx";
+        private const string TargetPath = @"C:\Users\156607\Amkor_Project\Document\장비 가동률 데이터\Bin Sorter\Bin Sorter Daily 가동현황_Local.xlsx";
 
         // 타겟 시트/컬럼
         private const int TargetSheetIndex = 1; // 두번째 시트
@@ -39,7 +39,7 @@ namespace ExcelStatusAnalyzer
         private readonly HashSet<string> _allowedEquip = new HashSet<string>(new[]
         {
             "BS-01","BS-02","BS-04","BS-05","BS-06","BS-07","BS-08","BS-09","BS-12",
-            "BS-13","BS-14","BS-11","BS-10","A-700"
+            "BS-13","BS-14","BS-11","BS-15","BS-16","BS-10","A-700"
         }, StringComparer.OrdinalIgnoreCase);        
 
         public DailyUtilFillForm3()
@@ -53,7 +53,7 @@ namespace ExcelStatusAnalyzer
 
         private void BuildUi()
         {
-            Text = "가동률 자동 채움 (Source -> PNP Daily 가동현황.xlsx)";
+            Text = "가동률 자동 채움 (Source -> Bin Sorter Daily 가동현황_Loacl.xlsx)";
             Width = 1200;
             Height = 780;
 
@@ -118,7 +118,7 @@ namespace ExcelStatusAnalyzer
             var list = new[]
             {
                 "BS-01","BS-02","BS-04","BS-05","BS-06","BS-07","BS-08","BS-09","BS-12",
-                "BS-13","BS-14","BS-11","BS-10","A-700"
+                "BS-13","BS-14","BS-11","BS-15","BS-16","BS-10","A-700"
             };
 
             _equipBlockIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -385,9 +385,10 @@ namespace ExcelStatusAnalyzer
                         var curEquip = ws.Cell(r, equipCol).GetString().Trim();
                         if (string.IsNullOrWhiteSpace(curEquip))
                             ws.Cell(r, equipCol).Value = equip;
-                        
+
                         ws.Cell(r, utilCol).Value = util;
-                        
+                        ws.Cell(r, utilCol).Style.NumberFormat.Format = "0.00"; // 표시만 2자리
+
                         result.UpdatedRows++;
                         updatedEquip.Add(equip);
                         wrote = true;
@@ -491,7 +492,7 @@ namespace ExcelStatusAnalyzer
             if (v is float)
             {
                 var d = Convert.ToDouble(v);
-                if (d > 0 && d <= 1.0) return d * 100.0;
+                //if (d > 0 && d <= 1.0) return d * 100.0;
                 return d;
             }
 
@@ -506,7 +507,7 @@ namespace ExcelStatusAnalyzer
             if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out d2) ||
                 double.TryParse(s, NumberStyles.Any, CultureInfo.CurrentCulture, out d2))
             {
-                if (d2 > 0 && d2 <= 1.0) return d2 * 100.0;
+                //if (d2 > 0 && d2 <= 1.0) return d2 * 100.0;
                 return d2;
             }
 

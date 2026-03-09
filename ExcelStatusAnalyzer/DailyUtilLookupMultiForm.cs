@@ -431,14 +431,14 @@ namespace ExcelStatusAnalyzer
             if (v is double)
             {
                 var d = (double)v;
-                if (d > 0 && d <= 1.0) return d * 100.0;
+                //if (d > 0 && d <= 1.0) return d * 100.0;
                 return d;
             }
             
             if (v is float)
             {
                 var d = Convert.ToDouble(v);
-                if (d > 0 && d <= 1.0) return d * 100.0;
+                //if (d > 0 && d <= 1.0) return d * 100.0;
                 return d;
             }
             
@@ -454,7 +454,7 @@ namespace ExcelStatusAnalyzer
             if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out d2) ||
                 double.TryParse(s, NumberStyles.Any, CultureInfo.CurrentCulture, out d2))
             {
-                if (d2 > 0 && d2 <= 1.0) return d2 * 100.0;
+                //if (d2 > 0 && d2 <= 1.0) return d2 * 100.0;
                 return d2;
             }
 

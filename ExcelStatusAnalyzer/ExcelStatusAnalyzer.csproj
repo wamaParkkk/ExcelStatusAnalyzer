@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -129,6 +130,12 @@
     <Compile Include="AlarmPivotForm5.Designer.cs">
       <DependentUpon>AlarmPivotForm5.cs</DependentUpon>
     </Compile>
+    <Compile Include="AlarmPivotForm6.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmPivotForm6.Designer.cs">
+      <DependentUpon>AlarmPivotForm6.cs</DependentUpon>
+    </Compile>
     <Compile Include="DailyTrackerPivotForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,6 +147,12 @@
     </Compile>
     <Compile Include="DailyUtilFillForm.Designer.cs">
       <DependentUpon>DailyUtilFillForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DailyUtilFillForm4.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DailyUtilFillForm4.Designer.cs">
+      <DependentUpon>DailyUtilFillForm4.cs</DependentUpon>
     </Compile>
     <Compile Include="DailyUtilFillForm3.cs">
       <SubType>Form</SubType>
@@ -189,6 +202,9 @@
     <EmbeddedResource Include="DailyTrackerPivotForm.resx">
       <DependentUpon>DailyTrackerPivotForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DailyUtilFillForm4.resx">
+      <DependentUpon>DailyUtilFillForm4.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DailyUtilFillForm3.resx">
       <DependentUpon>DailyUtilFillForm3.cs</DependentUpon>
     </EmbeddedResource>
@@ -203,6 +219,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="VisionRetryCountForm.resx">
       <DependentUpon>VisionRetryCountForm.cs</DependentUpon>
