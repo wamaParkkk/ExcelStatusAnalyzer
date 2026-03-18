@@ -148,6 +148,12 @@
     <Compile Include="DailyUtilFillForm.Designer.cs">
       <DependentUpon>DailyUtilFillForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DailyUtilFillForm5.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DailyUtilFillForm5.Designer.cs">
+      <DependentUpon>DailyUtilFillForm5.cs</DependentUpon>
+    </Compile>
     <Compile Include="DailyUtilFillForm4.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -201,6 +207,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DailyTrackerPivotForm.resx">
       <DependentUpon>DailyTrackerPivotForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DailyUtilFillForm5.resx">
+      <DependentUpon>DailyUtilFillForm5.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DailyUtilFillForm4.resx">
       <DependentUpon>DailyUtilFillForm4.cs</DependentUpon>

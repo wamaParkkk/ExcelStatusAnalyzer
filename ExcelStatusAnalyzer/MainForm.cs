@@ -186,7 +186,11 @@ namespace ExcelStatusAnalyzer
             btnDailyUtil4.Click += (s, e) => new DailyUtilFillForm4().Show();
             this.Controls.Add(btnDailyUtil4);
 
-            var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 855, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil5 = new Button { Text = "가동률 자동 입력(W-UD)", Left = 855, Top = 795, Width = 200, Height = 32 };
+            btnDailyUtil5.Click += (s, e) => new DailyUtilFillForm5().Show();
+            this.Controls.Add(btnDailyUtil5);
+
+            var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 1065, Top = 795, Width = 200, Height = 32 };
             btnDailyUtilLookupMulti.Click += (s, e) => new DailyUtilLookupMultiForm().Show();
             this.Controls.Add(btnDailyUtilLookupMulti);
         }
