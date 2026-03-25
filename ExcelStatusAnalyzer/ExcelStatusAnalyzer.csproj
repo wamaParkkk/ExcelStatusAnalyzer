@@ -179,6 +179,12 @@
       <DependentUpon>DailyUtilLookupMultiForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DirCount.cs" />
+    <Compile Include="ErrorMessagePivotForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ErrorMessagePivotForm.Designer.cs">
+      <DependentUpon>ErrorMessagePivotForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

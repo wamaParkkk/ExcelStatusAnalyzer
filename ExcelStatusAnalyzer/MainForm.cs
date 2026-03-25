@@ -40,7 +40,7 @@ namespace ExcelStatusAnalyzer
         {
             this.Text = "Excel Status Analyzer";
             this.Width = 1600;
-            this.Height = 900;
+            this.Height = 930;
 
             btnLoad = new Button
             {
@@ -170,29 +170,33 @@ namespace ExcelStatusAnalyzer
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
             this.Controls.Add(btnShiftWeb);
 
-            var btnDailyUtil = new Button { Text = "가동률 자동 입력(AS21100-FL/CL)", Left = 15, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil = new Button { Text = "가동률 자동 입력(AS21100-FL/CL)", Left = 15, Top = 798, Width = 200, Height = 32 };
             btnDailyUtil.Click += (s, e) => new DailyUtilFillForm().Show();
             this.Controls.Add(btnDailyUtil);
 
-            var btnDailyUtil2 = new Button { Text = "가동률 자동 입력(AS21105-FL/CL)", Left = 225, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil2 = new Button { Text = "가동률 자동 입력(AS21105-FL/CL)", Left = 225, Top = 798, Width = 200, Height = 32 };
             btnDailyUtil2.Click += (s, e) => new DailyUtilFillForm2().Show();
             this.Controls.Add(btnDailyUtil2);
 
-            var btnDailyUtil3 = new Button { Text = "가동률 자동 입력(AS21101-PNP)", Left = 435, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil3 = new Button { Text = "가동률 자동 입력(AS21101-PNP)", Left = 435, Top = 798, Width = 200, Height = 32 };
             btnDailyUtil3.Click += (s, e) => new DailyUtilFillForm3().Show();
             this.Controls.Add(btnDailyUtil3);
 
-            var btnDailyUtil4 = new Button { Text = "가동률 자동 입력(DMZ_I)", Left = 645, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil4 = new Button { Text = "가동률 자동 입력(DMZ_I)", Left = 645, Top = 798, Width = 200, Height = 32 };
             btnDailyUtil4.Click += (s, e) => new DailyUtilFillForm4().Show();
             this.Controls.Add(btnDailyUtil4);
 
-            var btnDailyUtil5 = new Button { Text = "가동률 자동 입력(W-UD)", Left = 855, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtil5 = new Button { Text = "가동률 자동 입력(W-UD)", Left = 855, Top = 798, Width = 200, Height = 32 };
             btnDailyUtil5.Click += (s, e) => new DailyUtilFillForm5().Show();
             this.Controls.Add(btnDailyUtil5);
 
-            var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 1065, Top = 795, Width = 200, Height = 32 };
+            var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 1065, Top = 798, Width = 200, Height = 32 };
             btnDailyUtilLookupMulti.Click += (s, e) => new DailyUtilLookupMultiForm().Show();
             this.Controls.Add(btnDailyUtilLookupMulti);
+
+            var btnErrorMsgPivot = new Button { Text = "Error 집계(AS21105-FL/CL(On/Off/DIV))", Left = 225, Top = 835, Width = 200, Height = 32 };
+            btnErrorMsgPivot.Click += (s, e) => new ErrorMessagePivotForm().Show();
+            this.Controls.Add(btnErrorMsgPivot);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)
