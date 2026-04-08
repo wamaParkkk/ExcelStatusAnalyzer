@@ -156,10 +156,15 @@ namespace ExcelStatusAnalyzer
             btnAlarmPivot5.Click += (s, e) => new AlarmPivotForm5().Show();
             this.Controls.Add(btnAlarmPivot5);
 
-            // Alarm Pivot6
-            var btnAlarmPivot6 = new Button { Text = "3회&3시간 이상(KTCB-장비별 MTBA)", Left = 1065, Top = 724, Width = 200, Height = 32 };
-            btnAlarmPivot6.Click += (s, e) => new AlarmPivotForm6().Show();
-            this.Controls.Add(btnAlarmPivot6);
+            // Alarm Raw Filter
+            var btnAlarmRawFilter = new Button { Text = "Alarm 추출(KTCB-장비별 White list)", Left = 1065, Top = 724, Width = 200, Height = 32 };
+            btnAlarmRawFilter.Click += (s, e) => new AlarmRawFilterForm().Show();
+            this.Controls.Add(btnAlarmRawFilter);
+
+            // Alarm Raw Filter
+            var btnAlarmRawJoinFilter = new Button { Text = "Alarm 추출(KTCB-장비별 알람 해석)", Left = 1065, Top = 761, Width = 200, Height = 32 };
+            btnAlarmRawJoinFilter.Click += (s, e) => new AlarmRawJoinFilterForm().Show();
+            this.Controls.Add(btnAlarmRawJoinFilter);
 
             // Daily tracker
             var btnDailyTracker = new Button { Text = "Daily Tracker(KTCB-모델별)", Left = 1275, Top = 724, Width = 200, Height = 32 };
@@ -193,6 +198,10 @@ namespace ExcelStatusAnalyzer
             var btnDailyUtilLookupMulti = new Button { Text = "가동률 Look-up", Left = 1065, Top = 798, Width = 200, Height = 32 };
             btnDailyUtilLookupMulti.Click += (s, e) => new DailyUtilLookupMultiForm().Show();
             this.Controls.Add(btnDailyUtilLookupMulti);
+
+            var btnUeMonthlyAutoFillForm = new Button { Text = "UE 월별 실적용", Left = 1275, Top = 798, Width = 200, Height = 32 };
+            btnUeMonthlyAutoFillForm.Click += (s, e) => new UeMonthlyAutoFillForm().Show();
+            this.Controls.Add(btnUeMonthlyAutoFillForm);
 
             var btnErrorMsgPivot = new Button { Text = "Error 집계(AS21105-FL/CL(On/Off/DIV))", Left = 225, Top = 835, Width = 200, Height = 32 };
             btnErrorMsgPivot.Click += (s, e) => new ErrorMessagePivotForm().Show();

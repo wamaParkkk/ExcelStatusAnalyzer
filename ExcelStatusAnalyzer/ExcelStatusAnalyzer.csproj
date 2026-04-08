@@ -118,6 +118,18 @@
     <Compile Include="AlarmPivotForm3.Designer.cs">
       <DependentUpon>AlarmPivotForm3.cs</DependentUpon>
     </Compile>
+    <Compile Include="AlarmRawJoinFilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmRawJoinFilterForm.Designer.cs">
+      <DependentUpon>AlarmRawJoinFilterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AlarmRawFilterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlarmRawFilterForm.Designer.cs">
+      <DependentUpon>AlarmRawFilterForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AlarmPivotForm4.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -129,12 +141,6 @@
     </Compile>
     <Compile Include="AlarmPivotForm5.Designer.cs">
       <DependentUpon>AlarmPivotForm5.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AlarmPivotForm6.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AlarmPivotForm6.Designer.cs">
-      <DependentUpon>AlarmPivotForm6.cs</DependentUpon>
     </Compile>
     <Compile Include="DailyTrackerPivotForm.cs">
       <SubType>Form</SubType>
@@ -198,6 +204,12 @@
     </Compile>
     <Compile Include="ShiftWebSummaryForm.Designer.cs">
       <DependentUpon>ShiftWebSummaryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UeMonthlyAutoFillForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UeMonthlyAutoFillForm.Designer.cs">
+      <DependentUpon>UeMonthlyAutoFillForm.cs</DependentUpon>
     </Compile>
     <Compile Include="VisionRetryCountForm.cs">
       <SubType>Form</SubType>

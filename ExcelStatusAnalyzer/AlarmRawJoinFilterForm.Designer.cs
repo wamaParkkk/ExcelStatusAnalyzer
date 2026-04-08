@@ -1,6 +1,6 @@
 ﻿namespace ExcelStatusAnalyzer
 {
-    partial class AlarmPivotForm6
+    partial class AlarmRawJoinFilterForm
     {
         /// <summary>
         /// Required designer variable.
@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "AlarmPivotForm6";
+            this.Text = "AlarmPivotForm4";
         }
 
         #endregion
