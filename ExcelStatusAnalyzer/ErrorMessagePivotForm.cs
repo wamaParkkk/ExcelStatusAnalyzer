@@ -200,8 +200,17 @@ namespace ExcelStatusAnalyzer
                 }
             }
 
-            var dateList = allDates.OrderBy(d => d).ToList();
+            List<DateTime> dateList = new List<DateTime>();
             
+            if (allDates.Count > 0)
+            {
+                var minDate = allDates.Min();
+                var maxDate = allDates.Max();
+                
+                for (var d = minDate; d <= maxDate; d = d.AddDays(1))
+                    dateList.Add(d);
+            }
+
             var dt = new DataTable();
             dt.Columns.Add(ColMessage);
             for (int i = 0; i < dateList.Count; i++)
