@@ -203,7 +203,7 @@ namespace ExcelStatusAnalyzer
             btnUeMonthlyAutoFillForm.Click += (s, e) => new UeMonthlyAutoFillForm().Show();
             this.Controls.Add(btnUeMonthlyAutoFillForm);
 
-            var btnErrorMsgPivot = new Button { Text = "Error 집계(AS21105-FL/CL(On/Off/DIV))", Left = 225, Top = 835, Width = 200, Height = 32 };
+            var btnErrorMsgPivot = new Button { Text = "Error 집계 (AS21105-FL/CL(On/Off/DIV) PLC)", Left = 225, Top = 835, Width = 200, Height = 32 };
             btnErrorMsgPivot.Click += (s, e) => new ErrorMessagePivotForm().Show();
             this.Controls.Add(btnErrorMsgPivot);
         }
