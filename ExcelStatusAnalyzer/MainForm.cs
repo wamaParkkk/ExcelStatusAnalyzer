@@ -39,8 +39,8 @@ namespace ExcelStatusAnalyzer
         private void BuildUi()
         {
             this.Text = "Excel Status Analyzer";
-            this.Width = 1600;
-            this.Height = 930;
+            this.Width = 1800;
+            this.Height = 1000;
 
             btnLoad = new Button
             {
@@ -171,6 +171,10 @@ namespace ExcelStatusAnalyzer
             btnDailyTracker.Click += (s, e) => new DailyTrackerPivotForm().Show();
             this.Controls.Add(btnDailyTracker);
 
+            var btnOpenCloseGroupPivotForm = new Button { Text = "Issue(KTCB-모델별)", Left = 1485, Top = 724, Width = 200, Height = 32 };
+            btnOpenCloseGroupPivotForm.Click += (s, e) => new OpenCloseGroupPivotForm().Show();
+            this.Controls.Add(btnOpenCloseGroupPivotForm);
+
             var btnShiftWeb = new Button { Text = "교대별 장비 상태 집계", Left = 15, Top = 761, Width = 200, Height = 32 };
             btnShiftWeb.Click += (s, e) => new ShiftWebSummaryForm().Show();
             this.Controls.Add(btnShiftWeb);
@@ -205,7 +209,7 @@ namespace ExcelStatusAnalyzer
 
             var btnErrorMsgPivot = new Button { Text = "Error 집계 (AS21105-FL/CL(On/Off/DIV) PLC)", Left = 225, Top = 835, Width = 200, Height = 32 };
             btnErrorMsgPivot.Click += (s, e) => new ErrorMessagePivotForm().Show();
-            this.Controls.Add(btnErrorMsgPivot);
+            this.Controls.Add(btnErrorMsgPivot);            
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)

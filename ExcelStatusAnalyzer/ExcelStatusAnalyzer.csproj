@@ -197,6 +197,12 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="OpenCloseGroupPivotForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OpenCloseGroupPivotForm.Designer.cs">
+      <DependentUpon>OpenCloseGroupPivotForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShiftWebSummaryForm.cs">
