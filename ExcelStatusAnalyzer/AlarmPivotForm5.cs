@@ -48,7 +48,7 @@ namespace ExcelStatusAnalyzer
                 Left = 15,
                 Top = 52,
                 Width = 1100,
-                Text = "Pivot4 동일 양식: F=Alarm Name, G/H=Start/End DateTime, I=Minutes. 시트1~4=APAMA, 시트5~6=APTURA (화이트리스트 적용)",
+                Text = "Pivot4 동일 양식: F=Alarm Name, G/H=Start/End DateTime, I=Minutes. 시트1~4=APAMA, 시트5~8=APTURA (화이트리스트 적용)",
                 AutoSize = false
             };
 

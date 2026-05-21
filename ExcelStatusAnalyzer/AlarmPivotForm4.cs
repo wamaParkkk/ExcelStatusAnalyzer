@@ -46,7 +46,7 @@ namespace ExcelStatusAnalyzer
                 Left = 15,
                 Top = 52,
                 Width = 1100,
-                Text = "F=Alarm Name, G/H=Start/End DateTime, I=Duration Minutes. 1~4시트: Lists\\APAMA_ALID.txt, 5~6시트: Lists\\APTURA_ALID.txt",
+                Text = "F=Alarm Name, G/H=Start/End DateTime, I=Duration Minutes. 1~4시트: Lists\\APAMA_ALID.txt, 5~8시트: Lists\\APTURA_ALID.txt",
                 AutoSize = false
             };
 
