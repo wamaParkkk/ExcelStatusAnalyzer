@@ -83,7 +83,7 @@ namespace ExcelStatusAnalyzer
 
                 tabSheets.TabPages.Clear();
 
-                // ✅ 리스트 로드 (실행파일 루트\Lists\*.txt)
+                // 리스트 로드 (실행파일 루트\Lists\*.txt)
                 var apama = LoadWhitelistFromRoot(@"Lists\APAMA_ALID.txt");
                 var aptura = LoadWhitelistFromRoot(@"Lists\APTURA_ALID.txt");
 
@@ -95,10 +95,10 @@ namespace ExcelStatusAnalyzer
                     {
                         var ws = wb.Worksheet(i);
 
-                        // 1~4 => APAMA, 5~6 => APTURA, 그 외는 필터 없음(안전)
+                        // 1~4 => APAMA, 5~8 => APTURA, 그 외는 필터 없음(안전)
                         HashSet<string> whitelist = null;
                         if (i >= 1 && i <= 4) whitelist = apama;
-                        else if (i >= 5 && i <= 6) whitelist = aptura;
+                        else if (i >= 5 && i <= 8) whitelist = aptura;
 
                         var dt = BuildSheetAlarmSummary(ws, whitelist);
                         

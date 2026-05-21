@@ -21,7 +21,7 @@ namespace ExcelStatusAnalyzer
         private readonly Dictionary<int, HashSet<string>> _whitelistBySheet =
             new Dictionary<int, HashSet<string>>();
 
-        // 그룹별 리스트 (APAMA: KTCB-01~04, APTURA: KTCB-05~06)
+        // 그룹별 리스트 (APAMA: KTCB-01~04, APTURA: KTCB-05~08)
         private HashSet<string> _apamaList;
         private HashSet<string> _apturaList;
 
@@ -33,9 +33,9 @@ namespace ExcelStatusAnalyzer
 
             // 실행파일 폴더/Lists/APAMA_ALID.txt, APTURA_ALID.txt에서 읽기
             _apamaList = LoadWhitelistFromTxt("APAMA_ALID");   // KTCB-01~04
-            _apturaList = LoadWhitelistFromTxt("APTURA_ALID"); // KTCB-05~06
+            _apturaList = LoadWhitelistFromTxt("APTURA_ALID"); // KTCB-05~08
 
-            // 시트 인덱스 기준으로 매핑 (1:KTCB-01, 2:KTCB-02, 3:KTCB-03, 4:KTCB-04, 5:KTCB-05, 6:KTCB-06)
+            // 시트 인덱스 기준으로 매핑 (1:KTCB-01, 2:KTCB-02, 3:KTCB-03, 4:KTCB-04, 5:KTCB-05, 6:KTCB-06, 7:KTCB-07, 8:KTCB-08)
             if (_apamaList != null)
             {
                 SetWhitelist(1, _apamaList);
@@ -48,6 +48,8 @@ namespace ExcelStatusAnalyzer
             {
                 SetWhitelist(5, _apturaList);
                 SetWhitelist(6, _apturaList);
+                SetWhitelist(7, _apturaList);
+                SetWhitelist(8, _apturaList);
             }
         }
 

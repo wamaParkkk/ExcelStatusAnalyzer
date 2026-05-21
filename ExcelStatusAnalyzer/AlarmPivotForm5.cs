@@ -88,7 +88,7 @@ namespace ExcelStatusAnalyzer
                 var path = ofd.FileName;
                 lblFile.Text = "파일: " + Path.GetFileName(path);
 
-                // ✅ 리스트 로드 (실행파일 루트\Lists\*.txt)
+                // 리스트 로드 (실행파일 루트\Lists\*.txt)
                 var apamaWhitelist = LoadWhitelistFromRoot(@"Lists\APAMA_ALID.txt");
                 var apturaWhitelist = LoadWhitelistFromRoot(@"Lists\APTURA_ALID.txt");
 
@@ -96,7 +96,7 @@ namespace ExcelStatusAnalyzer
                 {
                     // 모델별로 합산
                     var dtApama = BuildModelSummary(wb, 1, 4, apamaWhitelist);  // 시트 1~4
-                    var dtAptura = BuildModelSummary(wb, 5, 6, apturaWhitelist); // 시트 5~6
+                    var dtAptura = BuildModelSummary(wb, 5, 8, apturaWhitelist); // 시트 5~8
 
                     BindToTab(TabApama, dtApama);
                     BindToTab(TabAptura, dtAptura);
