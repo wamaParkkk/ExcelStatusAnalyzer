@@ -209,7 +209,11 @@ namespace ExcelStatusAnalyzer
 
             var btnErrorMsgPivot = new Button { Text = "Error 집계 (AS21105-FL/CL(On/Off/DIV) PLC)", Left = 225, Top = 835, Width = 200, Height = 32 };
             btnErrorMsgPivot.Click += (s, e) => new ErrorMessagePivotForm().Show();
-            this.Controls.Add(btnErrorMsgPivot);            
+            this.Controls.Add(btnErrorMsgPivot);
+
+            var btnAtcbDailyUtilFill = new Button { Text = "ATCB 가동률 자동 입력", Left = 15, Top = 872, Width = 200, Height = 32 };
+            btnAtcbDailyUtilFill.Click += (s, e) => new AtcbDailyUtilFillForm().Show();
+            this.Controls.Add(btnAtcbDailyUtilFill);
         }
 
         private void BtnLoad_Click(object sender, EventArgs e)

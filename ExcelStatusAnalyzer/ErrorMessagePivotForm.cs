@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using ClosedXML.Excel;
 
 namespace ExcelStatusAnalyzer
 {
@@ -36,7 +37,7 @@ namespace ExcelStatusAnalyzer
             
             btnLoad = new Button
             {
-                Text = "CSV 파일 불러오기",
+                Text = "엑셀 파일 불러오기",
                 Left = 15,
                 Top = 15,
                 Width = 170,
@@ -78,7 +79,7 @@ namespace ExcelStatusAnalyzer
                 Top = 52,
                 Width = 1120,
                 AutoSize = false,
-                Text = "CSV 집계 또는 TXT 로그 집계를 선택해서 날짜별 에러 횟수를 표시합니다."
+                Text = "엑셀 집계 또는 TXT 로그 집계를 선택해서 날짜별 에러 횟수를 표시합니다."
             };
             
             dgv = new DataGridView
@@ -109,14 +110,14 @@ namespace ExcelStatusAnalyzer
                 if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back) e.SuppressKeyPress = true;
                 if ((e.Control && e.KeyCode == Keys.C) || (e.Control && e.KeyCode == Keys.Insert)) e.SuppressKeyPress = true;
             };
-            
+
             ofd = new OpenFileDialog
             {
-                Filter = "CSV/TXT|*.csv;*.CSV;*.txt;*.TXT|All Files|*.*",
+                Filter = "Excel/CSV|*.xlsx;*.xls;*.csv;*.CSV|All Files|*.*",
                 Title = "파일 선택",
                 Multiselect = true
             };
-            
+
             Controls.Add(btnLoad);
             Controls.Add(btnLoadTxt);
             Controls.Add(btnCopy);
@@ -127,9 +128,9 @@ namespace ExcelStatusAnalyzer
 
         private void BtnLoad_Click(object sender, EventArgs e)
         {
-            ofd.Filter = "CSV|*.csv;*.CSV|All Files|*.*";
-            ofd.Title = "Error Raw CSV 파일 선택";
-            
+            ofd.Filter = "Excel/CSV|*.xlsx;*.xls;*.csv;*.CSV|All Files|*.*";
+            ofd.Title = "Error Raw Excel/CSV 파일 선택";
+
             if (ofd.ShowDialog() != DialogResult.OK) return;
             
             try
@@ -171,6 +172,11 @@ namespace ExcelStatusAnalyzer
             }
         }
 
+        private void BtnCopy_Click(object sender, EventArgs e)
+        {
+            CopyGridForExcel();
+        }
+
         private void BindResult(DataTable dt)
         {
             dgv.DataSource = null;
@@ -187,12 +193,7 @@ namespace ExcelStatusAnalyzer
             {
                 MessageBox.Show("집계할 데이터가 없습니다.", "안내", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-        }
-
-        private void BtnCopy_Click(object sender, EventArgs e)
-        {
-            CopyGridForExcel();
-        }
+        }        
 
         private DataTable BuildMessageDatePivotTable(string[] filePaths)
         {
@@ -202,9 +203,16 @@ namespace ExcelStatusAnalyzer
             
             foreach (var path in filePaths.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase))
             {
-                var rows = ReadCsvRows(path);
-                if (rows.Count == 0) continue;
+                List<List<string>> rows;
+                var ext = Path.GetExtension(path).ToLowerInvariant();
                 
+                if (ext == ".csv")
+                    rows = ReadCsvRows(path);
+                else
+                    rows = ReadExcelRows(path);
+                
+                if (rows.Count == 0) continue;
+
                 var header = rows[0];
                 
                 int messageCol = -1;
@@ -216,11 +224,12 @@ namespace ExcelStatusAnalyzer
                     
                     if (messageCol < 0 &&
                         (string.Equals(h, "Message", StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(h, "Message(s)", StringComparison.OrdinalIgnoreCase)))
+                         string.Equals(h, "Message(s)", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(h, "MESSAGE", StringComparison.OrdinalIgnoreCase)))
                     {
                         messageCol = i;
                     }
-                    
+
                     if (triggerDateCol < 0 &&
                         (string.Equals(h, "TriggerDate", StringComparison.OrdinalIgnoreCase) ||
                          string.Equals(h, "Trigger Date", StringComparison.OrdinalIgnoreCase) ||
@@ -262,7 +271,7 @@ namespace ExcelStatusAnalyzer
                         inner = new Dictionary<DateTime, int>();
                         merged[message] = inner;
                     }
-                    
+
                     int cur;
                     if (!inner.TryGetValue(rowDate.Value.Date, out cur)) cur = 0;
                     inner[rowDate.Value.Date] = cur + 1;
@@ -280,38 +289,52 @@ namespace ExcelStatusAnalyzer
             foreach (var path in filePaths.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 var rows = ReadDelimitedRows(path);
-                if (rows.Count < 3) continue;
+                if (rows == null || rows.Count == 0) continue;
                 
-                // 1행: "*** Error Log File Header (CSV File)"
-                // 2행: "*** Parsing List : OCCUR_TIME,ERROR_NO,EXPLANATION,..."
-                var headerRow = ParseTxtHeaderRow(rows);
-                if (headerRow.Count == 0) continue;
+                List<string> headerRow;
+                int dataStartRow;
                 
-                int occurTimeCol = FindExactColumnIndex(headerRow, "OCCUR_TIME");
+                // 형식 1: 안내문 + Parsing List
+                bool isParsingListFormat =
+                    rows.Count >= 2 &&
+                    rows[1] != null &&
+                    rows[1].Count > 0 &&
+                    string.Join(",", rows[1]).IndexOf("Parsing List", StringComparison.OrdinalIgnoreCase) >= 0;
+                
+                if (isParsingListFormat)
+                {
+                    headerRow = ParseTxtHeaderRow(rows);
+                    dataStartRow = 2;
+                }
+                else
+                {
+                    // 형식 2: 첫 줄이 바로 헤더
+                    headerRow = rows[0];
+                    dataStartRow = 1;
+                }
+                
+                if (headerRow == null || headerRow.Count == 0) continue;
+                
+                // EXPLANATION = 에러명
                 int explanationCol = FindExactColumnIndex(headerRow, "EXPLANATION");
+                if (explanationCol < 0) continue;
                 
-                if (occurTimeCol < 0 || explanationCol < 0) continue;
-                
+                // 날짜는 무조건 파일명에서만 사용
                 var fileDateFromName = ExtractDateFromFileName(path);
+                if (!fileDateFromName.HasValue)
+                    continue;
                 
-                // 데이터는 3행부터
-                for (int r = 2; r < rows.Count; r++)
+                for (int r = dataStartRow; r < rows.Count; r++)
                 {
                     var row = rows[r];
                     if (row == null || row.Count == 0) continue;
-                    if (row.Count <= Math.Max(occurTimeCol, explanationCol)) continue;
+                    if (row.Count <= explanationCol) continue;
                     
                     var explanation = (row[explanationCol] ?? string.Empty).Trim();
                     if (string.IsNullOrWhiteSpace(explanation)) continue;
                     
-                    DateTime? rowDate = ParseTxtOccurDate(row[occurTimeCol]);
-                    if (!rowDate.HasValue)
-                        rowDate = fileDateFromName;
-                    
-                    if (!rowDate.HasValue)
-                        continue;
-                    
-                    allDates.Add(rowDate.Value.Date);
+                    var rowDate = fileDateFromName.Value.Date;
+                    allDates.Add(rowDate);
                     
                     Dictionary<DateTime, int> inner;
                     if (!merged.TryGetValue(explanation, out inner))
@@ -319,10 +342,10 @@ namespace ExcelStatusAnalyzer
                         inner = new Dictionary<DateTime, int>();
                         merged[explanation] = inner;
                     }
-                    
+
                     int cur;
-                    if (!inner.TryGetValue(rowDate.Value.Date, out cur)) cur = 0;
-                    inner[rowDate.Value.Date] = cur + 1;
+                    if (!inner.TryGetValue(rowDate, out cur)) cur = 0;
+                    inner[rowDate] = cur + 1;
                 }
             }
 
@@ -332,16 +355,16 @@ namespace ExcelStatusAnalyzer
         private DataTable BuildPivotTable(Dictionary<string, Dictionary<DateTime, int>> merged, HashSet<DateTime> allDates)
         {
             var dateList = new List<DateTime>();
-            
+
             if (allDates.Count > 0)
             {
                 var minDate = allDates.Min();
                 var maxDate = allDates.Max();
-                
+
                 var today = DateTime.Today;
                 if (today > maxDate)
                     maxDate = today;
-                
+
                 for (var d = minDate; d <= maxDate; d = d.AddDays(1))
                     dateList.Add(d);
             }
@@ -351,12 +374,12 @@ namespace ExcelStatusAnalyzer
             for (int i = 0; i < dateList.Count; i++)
                 dtResult.Columns.Add(dateList[i].ToString("yyyy-MM-dd"), typeof(int));
             dtResult.Columns.Add(TotalColName, typeof(int));
-            
+
             foreach (var kv in merged)
             {
                 var row = dtResult.NewRow();
                 row[0] = kv.Key;
-                
+
                 int total = 0;
                 for (int i = 0; i < dateList.Count; i++)
                 {
@@ -378,13 +401,9 @@ namespace ExcelStatusAnalyzer
         {
             if (rows == null || rows.Count < 2) return new List<string>();
             
-            // 두 번째 줄:
-            // *** Parsing List : OCCUR_TIME,ERROR_NO,EXPLANATION,...
             var lineParts = rows[1];
             if (lineParts == null || lineParts.Count == 0) return new List<string>();
             
-            // ReadDelimitedRows에서 이미 ParseCsvLine을 한번 거쳤기 때문에
-            // 다시 ","로 합쳐서 원문처럼 복원
             var line = string.Join(",", lineParts);
             
             var idx = line.IndexOf(':');
@@ -407,8 +426,10 @@ namespace ExcelStatusAnalyzer
         private List<List<string>> ReadCsvRows(string path)
         {
             string text;
+            
             var bytes = File.ReadAllBytes(path);
             
+            // UTF-8 BOM 여부 확인
             bool hasUtf8Bom = bytes.Length >= 3 &&
                               bytes[0] == 0xEF &&
                               bytes[1] == 0xBB &&
@@ -417,14 +438,46 @@ namespace ExcelStatusAnalyzer
             if (hasUtf8Bom)
                 text = Encoding.UTF8.GetString(bytes);
             else
-                text = Encoding.GetEncoding(949).GetString(bytes);
+                text = Encoding.GetEncoding(949).GetString(bytes); // cp949 우선
             
             var result = new List<List<string>>();
             using (var sr = new StringReader(text))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
+                {
                     result.Add(ParseCsvLine(line));
+                }
+            }
+
+            return result;
+        }
+
+        private List<List<string>> ReadExcelRows(string path)
+        {
+            var result = new List<List<string>>();
+            
+            using (var wb = new XLWorkbook(path))
+            {
+                var ws = wb.Worksheets.First();
+                var used = ws.RangeUsed();
+                if (used == null) return result;
+                
+                int firstRow = used.FirstRow().RowNumber();
+                int lastRow = used.LastRow().RowNumber();
+                int lastCol = used.LastColumn().ColumnNumber();
+                
+                for (int r = firstRow; r <= lastRow; r++)
+                {
+                    var row = new List<string>();
+                    
+                    for (int c = 1; c <= lastCol; c++)
+                    {
+                        row.Add(GetExcelCellString(ws.Cell(r, c)));
+                    }
+
+                    result.Add(row);
+                }
             }
 
             return result;
@@ -434,17 +487,17 @@ namespace ExcelStatusAnalyzer
         {
             string text;
             var bytes = File.ReadAllBytes(path);
-            
+
             bool hasUtf8Bom = bytes.Length >= 3 &&
                               bytes[0] == 0xEF &&
                               bytes[1] == 0xBB &&
                               bytes[2] == 0xBF;
-            
+
             if (hasUtf8Bom)
                 text = Encoding.UTF8.GetString(bytes);
             else
                 text = Encoding.GetEncoding(949).GetString(bytes);
-            
+
             var result = new List<List<string>>();
             using (var sr = new StringReader(text))
             {
@@ -459,7 +512,7 @@ namespace ExcelStatusAnalyzer
         private List<string> ParseCsvLine(string line)
         {
             var result = new List<string>();
-            
+
             if (line == null)
             {
                 result.Add(string.Empty);
@@ -468,11 +521,11 @@ namespace ExcelStatusAnalyzer
 
             var sb = new StringBuilder();
             bool inQuotes = false;
-            
+
             for (int i = 0; i < line.Length; i++)
             {
                 char ch = line[i];
-                
+
                 if (ch == '"')
                 {
                     if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
@@ -503,40 +556,40 @@ namespace ExcelStatusAnalyzer
         private DateTime? ExtractDateFromFileName(string path)
         {
             var name = Path.GetFileNameWithoutExtension(path);
-            
+
             DateTime dt;
-            
+
             var m1 = Regex.Match(name, @"(20\d{2}-\d{2}-\d{2})");
             if (m1.Success && DateTime.TryParseExact(m1.Groups[1].Value, "yyyy-MM-dd",
                 CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                 return dt;
-            
+
             var m2 = Regex.Match(name, @"(20\d{6})");
             if (m2.Success && DateTime.TryParseExact(m2.Groups[1].Value, "yyyyMMdd",
                 CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                 return dt;
-            
+
             return null;
         }
 
         private DateTime? ParseRowDate(string s)
         {
             if (string.IsNullOrWhiteSpace(s)) return null;
-            
+
             s = s.Trim();
-            
+
             DateTime dt;
-            
+
             if (DateTime.TryParseExact(s,
                 new[] { "yyyy-MM-dd", "yyyy/M/d", "MM/dd/yyyy", "M/d/yyyy", "yyyyMMdd" },
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out dt))
                 return dt.Date;
-            
+
             if (DateTime.TryParse(s, out dt))
                 return dt.Date;
-            
+
             return null;
         }
 
@@ -549,43 +602,103 @@ namespace ExcelStatusAnalyzer
             DateTime dt;
             
             if (DateTime.TryParseExact(s,
-                new[] { "yyyy-MM-dd HH:mm:ss.fff", "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss.fff", "yyyy/MM/dd HH:mm:ss" },
+                new[]
+                {
+                    "yyyy-MM-dd HH:mm:ss.fff",
+                    "yyyy-MM-dd HH:mm:ss",
+                    "yyyy/MM/dd HH:mm:ss.fff",
+                    "yyyy/MM/dd HH:mm:ss",
+                    "yyyy-MM-dd",
+                    "yyyy/MM/dd",
+                    "MM/dd/yyyy HH:mm:ss",
+                    "M/d/yyyy HH:mm:ss",
+                    "MM/dd/yyyy",
+                    "M/d/yyyy"
+                },
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out dt))
                 return dt.Date;
-            
+
             if (DateTime.TryParse(s, out dt))
                 return dt.Date;
             
             return null;
         }
 
+        private DateTime? FindDateFromRowLeadingCells(List<string> row, int explanationCol)
+        {
+            if (row == null || row.Count == 0) return null;
+            
+            int max = Math.Min(explanationCol - 1, row.Count - 1);
+            if (max < 0) max = Math.Min(2, row.Count - 1);
+            
+            for (int i = 0; i <= max; i++)
+            {
+                var s = (row[i] ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(s)) continue;
+                
+                var dt = ParseTxtOccurDate(s);
+                if (dt.HasValue)
+                    return dt.Value.Date;
+            }
+
+            return null;
+        }
+
         private string ExtractMessageOnly(List<string> row, int messageCol, Regex rx)
         {
             if (row == null || row.Count <= messageCol) return string.Empty;
-            
+
             string message = (row[messageCol] ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(message)) return string.Empty;
-            
+
             if (rx.IsMatch(message))
                 return message;
-            
+
             var sb = new StringBuilder(message);
-            
+
             for (int i = messageCol + 1; i < row.Count; i++)
             {
                 var part = (row[i] ?? string.Empty).Trim();
                 if (string.IsNullOrWhiteSpace(part)) continue;
-                
+
                 sb.Append(", ").Append(part);
-                
+
                 if (rx.IsMatch(sb.ToString()))
                     return sb.ToString();
             }
 
             return string.Empty;
         }
+
+        private string GetExcelCellString(IXLCell cell)
+        {
+            if (cell == null) return string.Empty;
+            
+            switch (cell.DataType)
+            {
+                case XLDataType.Text:
+                    return cell.GetString().Trim();
+                
+                case XLDataType.Number:
+                    return cell.GetDouble().ToString(CultureInfo.InvariantCulture).Trim();
+                
+                case XLDataType.Boolean:
+                    return cell.GetBoolean() ? "TRUE" : "FALSE";
+                
+                case XLDataType.DateTime:
+                    return cell.GetDateTime().ToString("yyyy-MM-dd");
+                
+                case XLDataType.Blank:
+                    return string.Empty;
+                
+                default:
+                    var s = cell.GetString();
+                    if (!string.IsNullOrEmpty(s)) return s.Trim();
+                    return cell.Value.ToString().Trim();
+            }
+        }                                                
 
         private void CopyGridForExcel()
         {
