@@ -111,7 +111,7 @@ namespace ExcelStatusAnalyzer
                         
                         HashSet<string> whitelist = null;
                         if (i >= 1 && i <= 4) whitelist = _apamaWhitelist;
-                        else if (i >= 5 && i <= 8) whitelist = _apturaWhitelist;
+                        else if (i >= 5 && i <= 9) whitelist = _apturaWhitelist;
                         
                         var dt = BuildFilteredRawTable(ws, whitelist);
                         

@@ -95,10 +95,10 @@ namespace ExcelStatusAnalyzer
                     {
                         var ws = wb.Worksheet(i);
 
-                        // 1~4 => APAMA, 5~8 => APTURA, 그 외는 필터 없음(안전)
+                        // 1~4 => APAMA, 5~9 => APTURA, 그 외는 필터 없음(안전)
                         HashSet<string> whitelist = null;
                         if (i >= 1 && i <= 4) whitelist = apama;
-                        else if (i >= 5 && i <= 8) whitelist = aptura;
+                        else if (i >= 5 && i <= 9) whitelist = aptura;
 
                         var dt = BuildSheetAlarmSummary(ws, whitelist);
                         

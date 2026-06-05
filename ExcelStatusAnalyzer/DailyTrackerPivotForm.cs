@@ -47,7 +47,7 @@ namespace ExcelStatusAnalyzer
                 Left = 15,
                 Top = 52,
                 Width = 1100,
-                Text = "A=Description, B=Frequency, C=Time. 시트1~4=APAMA, 시트5~8=APTURA (각각 Description별 합산)",
+                Text = "A=Description, B=Frequency, C=Time. 시트1~4=APAMA, 시트5~9=APTURA (각각 Description별 합산)",
                 AutoSize = false
             };
 
@@ -88,9 +88,9 @@ namespace ExcelStatusAnalyzer
 
                 using (var wb = new XLWorkbook(path))
                 {
-                    // 시트1~4 => APAMA, 시트5~8 => APTURA
+                    // 시트1~4 => APAMA, 시트5~9 => APTURA
                     var dtApama = BuildModelPivot(wb, 1, 4);
-                    var dtAptura = BuildModelPivot(wb, 5, 8);
+                    var dtAptura = BuildModelPivot(wb, 5, 9);
 
                     BindToTab(TabApama, dtApama);
                     BindToTab(TabAptura, dtAptura);

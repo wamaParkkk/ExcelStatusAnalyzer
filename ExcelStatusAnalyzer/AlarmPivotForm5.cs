@@ -96,7 +96,7 @@ namespace ExcelStatusAnalyzer
                 {
                     // 모델별로 합산
                     var dtApama = BuildModelSummary(wb, 1, 4, apamaWhitelist);  // 시트 1~4
-                    var dtAptura = BuildModelSummary(wb, 5, 8, apturaWhitelist); // 시트 5~8
+                    var dtAptura = BuildModelSummary(wb, 5, 9, apturaWhitelist); // 시트 5~9
 
                     BindToTab(TabApama, dtApama);
                     BindToTab(TabAptura, dtAptura);
